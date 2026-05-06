@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog PC Building</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --accent: #00ff88;
+            --border: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .header {
+            text-align: center; margin-bottom: 20px; padding: 20px;
+            background: var(--card-bg); border-radius: 12px;
+            border: 1px solid var(--border); width: 100%; max-width: 800px;
+        }
+        h1 { color: var(--accent); margin: 0 0 10px 0; }
+        .input-section { margin-bottom: 30px; }
+        input {
+            padding: 10px; border-radius: 5px; border: 1px solid var(--border);
+            background: var(--card-bg); color: white; width: 200px;
+        }
+        button {
+            padding: 10px 20px; border-radius: 5px; border: none;
+            background: var(--accent); color: black; font-weight: bold; cursor: pointer;
+        }
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px; width: 100%; max-width: 1000px;
+        }
+        .card {
+            background-color: var(--card-bg); padding: 20px;
+            border-radius: 10px; border: 1px solid var(--border);
+            text-align: center; transition: 0.2s;
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="katalog-title">Memuat...</h1>
+        <div class="identity">
+            Pemilik: <strong id="owner-name" style="color: var(--accent);">...</strong> | 
+            NIM: <strong id="owner-nim">...</strong>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <input type="text" id="new-item" placeholder="Komponen baru...">
+        <button onclick="addItem()">Tambah</button>
+    </div>
+
+    <div class="grid" id="item-grid"></div>
+
+    <script>
+        const API_URL = '/api';
+
+        async function fetchKatalog() {
+            try {
+                const res = await fetch(`${API_URL}/info`);
+                const data = await res.json();
+                document.getElementById('katalog-title').textContent = data.judul_katalog;
+                document.getElementById('owner-name').textContent = data.pemilik;
+                document.getElementById('owner-nim').textContent = data.nim;
+                const grid = document.getElementById('item-grid');
+                grid.innerHTML = '';
+                data.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.textContent = item;
+                    grid.appendChild(card);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function addItem() {
+            const input = document.getElementById('new-item');
+            if (!input.value) return;
+            try {
+                await fetch(`${API_URL}/add-item`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item: input.value })
+                });
+                input.value = '';
+                fetchKatalog();
+            } catch (e) { console.error(e); }
+        }
+        fetchKatalog();
+    </script>
+</body>
+</html>

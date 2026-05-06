@@ -1,0 +1,11 @@
+# Kubernetes sensitive files
+.kube/
+kubeconfig
+config
+*.crt
+*.pem
+config-portable
+
+# Environment and Logs
+.env
+*.log
